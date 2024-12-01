@@ -2,7 +2,7 @@ import * as dotenv from "dotenv"
 import { Dialect } from "sequelize"
 dotenv.config()
 
-const PORT = process.env.DB_PORT && isNaN(+process.env.DB_PORT) ? process.env.DB_PORT : 5432
+const PORT = process.env.DB_PORT && isNaN(+process.env.DB_PORT) ? +process.env.DB_PORT : 5432
 const databaseName = process.env.DB_NAME || "simple_chat"
 
 const config = {
