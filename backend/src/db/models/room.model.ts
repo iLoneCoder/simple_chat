@@ -1,9 +1,23 @@
-import { Sequelize, Model, DataTypes } from "sequelize";
+import { Model, DataTypes, Association } from "sequelize";
 import sequelize from "../sequelize";
+import RoomMember from "./room_member.model";
+import User from "./user.model";
 
 class Room extends Model {
     declare id: number
     declare name: string
+    declare RoomMembers: RoomMember[]
+    declare Members: User[]
+
+    static associations: { 
+        RoomMembers: Association<Room, RoomMember>; 
+        Members: Association<Room, User>; 
+    }
+
+    static associate() {
+        this.belongsToMany(User, { foreignKey: "roomId", through: RoomMember })
+        this.hasMany(RoomMember, { foreignKey: "roomId" })
+    }
 }
 
 Room.init({
