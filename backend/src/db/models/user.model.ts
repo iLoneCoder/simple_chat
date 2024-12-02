@@ -15,7 +15,7 @@ class User extends Model {
     }
 
     static associate() {
-        this.belongsToMany(Room, { foreignKey: "memberId",  through: RoomMember})
+        this.belongsToMany(Room, { foreignKey: "memberId", otherKey: "roomId", through: RoomMember, as: "rooms"})
         this.hasMany(RoomMember, { foreignKey: "memberId" })
     }
 }
