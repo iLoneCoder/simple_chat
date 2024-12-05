@@ -1,4 +1,4 @@
-import { DataTypes, Model, Association } from "sequelize";
+import { DataTypes, Model, Association, BelongsToManyGetAssociationsMixin } from "sequelize";
 import sequelize from "../sequelize";
 import RoomMember from "./room_member.model";
 import Room from "./room.model";
@@ -8,6 +8,8 @@ class User extends Model {
     declare username: string
     declare RoomMembers: RoomMember[]
     declare Rooms: Room[]
+
+    declare getRooms: BelongsToManyGetAssociationsMixin<Room>
 
     static associations: { 
         RoomMembers: Association<User, RoomMember>; 
