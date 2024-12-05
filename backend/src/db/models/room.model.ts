@@ -1,4 +1,10 @@
-import { Model, DataTypes, Association, HasManyAddAssociationMixin, HasManyGetAssociationsMixin, BelongsToManyAddAssociationMixin, BelongsToManyGetAssociationsMixin } from "sequelize";
+import { 
+    Model, 
+    DataTypes, 
+    Association, 
+    BelongsToManyAddAssociationMixin, 
+    BelongsToManyGetAssociationsMixin, 
+    BelongsToManyRemoveAssociationMixin } from "sequelize";
 import sequelize from "../sequelize";
 import RoomMember from "./room_member.model";
 import User from "./user.model";
@@ -12,6 +18,7 @@ class Room extends Model {
     // Association methods
     declare addMember: BelongsToManyAddAssociationMixin<User, number>;
     declare getMembers: BelongsToManyGetAssociationsMixin<User>;
+    declare removeMember: BelongsToManyRemoveAssociationMixin<User, number>
 
     static associations: { 
         RoomMembers: Association<Room, RoomMember>; 

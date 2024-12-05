@@ -13,13 +13,15 @@ app.use("/api/v1", roomRouter)
 app.use("*", (req: Request, res: Response) => {
     res.status(404).json({
         status: "error",
-        message: "Not found"
+        message: "URL not found"
     })
 })
 
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    const statusCode = 500
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    const statusCode = err.statusCode ? err.statusCode : 500
+    
     console.log(err)
+
     res.status(statusCode).json({
         status: "error",
         message: err.message
