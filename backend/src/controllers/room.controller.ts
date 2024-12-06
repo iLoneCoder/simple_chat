@@ -98,3 +98,20 @@ export async function getRoomMembers(req: Request, res: Response, next: NextFunc
         next(error)
     }
 }
+
+export async function getRoomByName(req: Request, res: Response, next: NextFunction) {
+    try {
+        const { roomName } = req.params
+        const room = await Room.findOne({where: {name: roomName}})
+        if (!room) {
+            throw new AppError("Room not found", 404)
+        }
+
+        res.status(200).json({
+            status: "success",
+            data: room
+        })
+    } catch (error) {
+        next(error)
+    }
+}
