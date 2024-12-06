@@ -1,0 +1,32 @@
+.chatbox {
+    margin: 10px auto 10px;
+    border: 1px solid black;
+    width: 50vw;
+    height: 70vh;
+}
+
+
+.form-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 5px;
+}
+
+.form {
+    display: flex;
+    width: 400px;
+}
+
+.form-label {
+    display: inline-block;
+    width: 80px;
+}
+
+.form-input,
+.message-box {
+    flex-grow: 1;
+}
+
+.message-box {
+    height: 50px;
+}
