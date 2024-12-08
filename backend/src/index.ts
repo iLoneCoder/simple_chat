@@ -4,6 +4,7 @@ import { Server } from "socket.io"
 import cors from "cors"
 import userRouter from "./routes/user.router"
 import roomRouter from "./routes/room.router"
+import socketHandler from "./socket"
 
 const app = express()
 const server = createServer(app)
@@ -21,7 +22,7 @@ app.use("/api/v1", userRouter)
 app.use("/api/v1", roomRouter)
 
 io.on("connection", (socket) => {
-    console.log("a user connected ", socket.id)
+    socketHandler(socket)
 })
 
 app.use("*", (req: Request, res: Response) => {

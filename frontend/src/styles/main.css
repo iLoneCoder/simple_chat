@@ -1,11 +1,5 @@
-.chatbox {
-    margin: 10px auto 10px;
-    border: 1px solid black;
-    width: 50vw;
-    height: 70vh;
-}
 
-
+/* MAIN */
 .form-wrapper {
     display: flex;
     justify-content: center;
@@ -29,4 +23,26 @@
 
 .message-box {
     height: 50px;
+}
+
+/* CHATBOX */
+
+.chatbox {
+    margin: 10px auto 10px;
+    border: 1px solid black;
+    width: 50vw;
+    height: 70vh;
+}
+
+ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.announcement {
+    text-align: center;
+    background-color: black;
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: bold;
 }
