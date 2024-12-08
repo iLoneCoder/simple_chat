@@ -28,7 +28,11 @@ function Main() {
     useEffect(() => {
          if (socket.current) {
             function handleReceiveMessage(message) {
-                console.log(message)
+                const nm = {
+                    type: "message",
+                    text: message
+                }
+                setMessages(prevMessages => [...prevMessages, nm])
             }
             
             socket.current.on("receive-message", handleReceiveMessage)
@@ -51,6 +55,10 @@ function Main() {
             console.log(data)
             setUserFromDb({...data.data})
             setDisabledRoom(false)
+            
+            if (socket.current) {
+                socket.current.emit("unsubscribe")
+            }
         } catch (error) {
             console.log(error)
         }
@@ -69,6 +77,7 @@ function Main() {
                 text: `You have joined ${room}`
             }])
             socket.current.connect()
+            socket.current.emit("join-room", room)
         } catch (error) {
             console.log(error)
         }
@@ -80,9 +89,8 @@ function Main() {
                 type: "message",
                 text: newMessage 
             }])
-            socket.current.emit("send-message", {message: newMessage})
+            socket.current.emit("send-message", {room: room, message: newMessage})
             setNewMessage("")
-            
         }
     }
 

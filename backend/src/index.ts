@@ -22,7 +22,7 @@ app.use("/api/v1", userRouter)
 app.use("/api/v1", roomRouter)
 
 io.on("connection", (socket) => {
-    socketHandler(socket)
+    socketHandler(socket, io)
 })
 
 app.use("*", (req: Request, res: Response) => {
