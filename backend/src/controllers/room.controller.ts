@@ -99,6 +99,39 @@ export async function getRoomMembers(req: Request, res: Response, next: NextFunc
     }
 }
 
+export async function isMemberOfRoom(req: Request, res: Response, next: NextFunction) {
+    try {
+        const { roomName, memberName } = req.params
+
+        const room = await Room.findOne({
+            where: {
+                name: roomName,
+
+            },
+            include: {
+                association: "members",
+                where: {
+                    username: memberName
+                },
+                through: {
+                    attributes: []
+                }
+            }
+        })
+
+        if (!room) {
+            throw new AppError("Room not found or you aren't room member", 404)
+        }
+
+        res.status(200).json({
+            status: "success",
+            data: room
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 export async function getRoomByName(req: Request, res: Response, next: NextFunction) {
     try {
         const { roomName } = req.params
