@@ -45,6 +45,26 @@ function Main() {
 
     }, [])
 
+
+    useEffect(() => {
+        console.log({socket: socket.current})
+        if (socket.current) {
+            function handleResponseOnJoin(message) {
+                console.log(message)
+                setMessages(prevMessages => [...prevMessages, message])
+                if (message.type === "announcement") {
+                    setDisabledMessage(false)
+                }
+            }
+
+            socket.current.on("response_on_join", handleResponseOnJoin)
+            
+            return () => {
+                socket.current.off("response_on_join", handleResponseOnJoin)
+            }
+        }
+    }, [])
+
     async function handleUserJoin() {
         try {
             const response = await fetch(`http://localhost:8000/api/v1/user/${username}`)
@@ -52,7 +72,7 @@ function Main() {
             if (!response.ok) {
                 throw new Error(data.message)
             }
-            console.log(data)
+            
             setUserFromDb({...data.data})
             setDisabledRoom(false)
             
@@ -66,18 +86,8 @@ function Main() {
 
     async function handleRoomJoin() {
         try {
-            const response = await fetch(`http://localhost:8000/api/v1/room/${room}/member/${username}`)
-            const data = await response.json()
-            if (!response.ok) {
-                throw new Error(data.message)
-            }
-            setDisabledMessage(false)
-            setMessages(prevMessages => [...prevMessages, {
-                type: "announcement",
-                text: `You have joined ${room}`
-            }])
             socket.current.connect()
-            socket.current.emit("join-room", room)
+            socket.current.emit("join-room", {room, username})
         } catch (error) {
             console.log(error)
         }

@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { Room, User } from "../db";
 import AppError from "../utils/appError";
+import { getMemeberOfRoom } from "../commands/room";
 
 export async function createRoom(req: Request, res: Response, next: NextFunction) {
     try {
@@ -103,25 +104,7 @@ export async function isMemberOfRoom(req: Request, res: Response, next: NextFunc
     try {
         const { roomName, memberName } = req.params
 
-        const room = await Room.findOne({
-            where: {
-                name: roomName,
-
-            },
-            include: {
-                association: "members",
-                where: {
-                    username: memberName
-                },
-                through: {
-                    attributes: []
-                }
-            }
-        })
-
-        if (!room) {
-            throw new AppError("Room not found or you aren't room member", 404)
-        }
+        const room = await getMemeberOfRoom(roomName, memberName)
 
         res.status(200).json({
             status: "success",

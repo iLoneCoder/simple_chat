@@ -25,7 +25,7 @@ function Chatbox({messages}) {
                 {messages.map((message, index) => (
                     <li 
                         key={index} 
-                        className={message.type === "announcement" ? "announcement": "message"}
+                        className={message.type === "announcement" ? "announcement": message.type === "error" ? "error" : "message"}
                         style={
                             index % 2 === 0 && message.type === "message"
                               ? { backgroundColor: "grey", color: "#fff" }

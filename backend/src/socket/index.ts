@@ -1,27 +1,37 @@
 import { Socket, Server } from "socket.io";
+import { getMemeberOfRoom } from "../commands/room";
 
 export default function socketHandler(socket: Socket, io: Server) {
     console.log("user connected: ", socket.id)
     socket.on("send-message", messageObj => {
         if (messageObj.room) {
-            console.log(messageObj)
             socket.to(messageObj.room).emit("receive-message", messageObj.message)
         }
     })
 
-    socket.on("join-room", (room) => {
-        console.log("join-room: ", room)
-        socket.join(room)
+    socket.on("join-room", async (joinData:{room: string, username: string}) => {
+        try {
+            await getMemeberOfRoom(joinData.room, joinData.username)            
+            socket.join(joinData.room)
+            io.to(joinData.room).emit("response_on_join", {
+                type: "announcement",
+                text: `${joinData.username} joined room ${joinData.room}`
+            })
+        } catch (error) {
+            console.log(error)
+            socket.emit("response_on_join", {
+                type: "error",
+                text: `You can't join the room`
+            })
+        }
     })
 
     socket.on("unsubscribe", () => {
-        console.log(socket.id)
         const currentId = socket.id
         for (let room of socket.rooms) {
             if (room !== currentId) {
                 socket.leave(room)
             }
         }
-        // console.log("unsubscribe: ", socket.rooms)
     })
 }

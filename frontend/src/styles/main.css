@@ -39,10 +39,18 @@ ul {
     padding-left: 0;
 }
 
-.announcement {
+.announcement,
+.error {
     text-align: center;
-    background-color: black;
     color: #fff;
     font-size: 1.2rem;
     font-weight: bold;
+}
+
+.announcement {
+    background-color: black;
+}
+
+.error {
+    background-color: red;
 }
