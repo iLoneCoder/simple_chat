@@ -28,11 +28,7 @@ function Main() {
     useEffect(() => {
          if (socket.current) {
             function handleReceiveMessage(message) {
-                const nm = {
-                    type: "message",
-                    text: message
-                }
-                setMessages(prevMessages => [...prevMessages, nm])
+                setMessages(prevMessages => [...prevMessages, message])
             }
             
             socket.current.on("receive-message", handleReceiveMessage)
@@ -99,7 +95,7 @@ function Main() {
                 type: "message",
                 text: newMessage 
             }])
-            socket.current.emit("send-message", {room: room, message: newMessage})
+            socket.current.emit("send-message", {username, room, message: newMessage})
             setNewMessage("")
         }
     }
