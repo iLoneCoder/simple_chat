@@ -12,8 +12,10 @@ import User from "./user.model";
 class Room extends Model {
     declare id: number
     declare name: string
-    declare RoomMembers: RoomMember[]
-    declare Members: User[]
+    declare password: string
+    // declare RoomMembers: RoomMember[]
+    // declare Members: User[]
+    declare members: User[]
 
     // Association methods
     declare addMember: BelongsToManyAddAssociationMixin<User, number>;
@@ -21,8 +23,9 @@ class Room extends Model {
     declare removeMember: BelongsToManyRemoveAssociationMixin<User, number>
 
     static associations: { 
-        RoomMembers: Association<Room, RoomMember>; 
-        Members: Association<Room, User>; 
+        // RoomMembers: Association<Room, RoomMember>; 
+        // Members: Association<Room, User>; 
+        members: Association<Room, User>; 
     }
 
     static associate() {
@@ -41,6 +44,10 @@ Room.init({
     name: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    password: {
+        type: DataTypes.STRING,
+        allowNull: false
     }
 },
 {
@@ -48,7 +55,19 @@ Room.init({
     modelName: "Room",
     tableName: "rooms",
     createdAt: "created_at",
-    updatedAt: "updated_at"
+    updatedAt: "updated_at",
+    defaultScope: {
+        attributes: {
+            exclude: [ "password" ]
+        }
+    },
+    hooks: {
+        afterCreate: (user) => {
+            if (user.dataValues) {
+                delete user.dataValues.password
+            }
+        }
+    }
 })
 
 export default Room
