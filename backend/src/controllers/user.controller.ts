@@ -36,7 +36,20 @@ export async function createUser(req: Request, res: Response, next: NextFunction
     }
 }
 
-export async function joinAsUser(req: Request, res: Response, next: NextFunction) {
+export async function listUsers(req: Request, res: Response, next:NextFunction) {
+    try {
+        const users = await User.findAll()
+
+        res.status(200).json({
+            status: "success",
+            data: users
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+export async function getUserDetails(req: Request, res: Response, next: NextFunction) {
     try {
         const { username } = req.params
         

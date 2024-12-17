@@ -28,6 +28,19 @@ export async function createRoom(req: Request, res: Response, next: NextFunction
     }
 }
 
+export async function listRooms(req: Request, res: Response, next: NextFunction) {
+    try {
+        const rooms = await Room.findAll()
+
+        res.status(200).json({
+            status: "success",
+            data: rooms
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 export async function addMemberToRoom(req: Request, res: Response, next: NextFunction) {
     try {
         const { roomId } = req.params
