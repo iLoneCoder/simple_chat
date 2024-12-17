@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { User } from "../db";
 import AppError from "../utils/appError";
-import { hashPassword } from "../utils/roomPassword";
+import { comparePasswords, generateToken, hashPassword } from "../utils/roomPassword";
 
 export async function createUser(req: Request, res: Response, next: NextFunction) {
     try {
@@ -30,6 +30,41 @@ export async function createUser(req: Request, res: Response, next: NextFunction
         res.status(201).json({
             status: "success",
             data: user
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+export async function login(req: Request, res: Response, next: NextFunction) {
+    try {
+        const { username, password } = req.body
+
+        if (!username) {
+            throw new AppError("username is required", 400)
+        }
+
+        if (!password) {
+            throw new AppError("password is required", 400)
+        }
+
+        const user = await User.scope("withPassword").findOne({where: { username }})
+
+        if (!user) {
+            throw new AppError("Username or Password incorrect", 400)
+        }
+
+        const passwordIsCorrect = await comparePasswords(password, user.password)
+
+        if (!passwordIsCorrect) {
+            throw new AppError("Username or Password incorrect", 400)
+        }
+
+        const token = await generateToken(username)
+        
+        res.status(200).json({
+            status: "success",
+            token
         })
     } catch (error) {
         next(error)

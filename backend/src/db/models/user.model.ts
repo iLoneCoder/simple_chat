@@ -59,6 +59,13 @@ User.init({
                 delete user.dataValues.password
             }
         }
+    },
+    scopes: {
+        withPassword: {
+            attributes: {
+                include: ["password"]
+            }
+        }
     }
 })
 

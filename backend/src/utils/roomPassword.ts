@@ -1,5 +1,6 @@
 import crypto from "crypto"
 import util from "util"
+import jwt from "jsonwebtoken"
 
 const scrypt = util.promisify(crypto.scrypt)
 
@@ -17,11 +18,20 @@ async function comparePasswords(inputPassword: string, dbPassword: string): Prom
     const salt = dbPassword.split(".")[1]
     const hashedPassword = await hashPassword(inputPassword, salt)
 
-    return hashedPassword === inputPassword
+    return hashedPassword === dbPassword
 }
 
+async function generateToken(username: string): Promise<string> {
+    const secret = process.env.SECRET || "secret"
+    const token = await jwt.sign({
+        username
+    }, secret, {expiresIn: "7d"})
+
+    return token
+}
 
 export {
     hashPassword,
-    comparePasswords
+    comparePasswords,
+    generateToken
 }

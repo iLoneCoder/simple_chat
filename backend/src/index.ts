@@ -1,4 +1,5 @@
 import express, { NextFunction, Request, Response } from "express"
+import * as dotenv from "dotenv"
 import { createServer } from "node:http"
 import { Server } from "socket.io"
 import cors from "cors"
@@ -6,6 +7,7 @@ import userRouter from "./routes/user.router"
 import roomRouter from "./routes/room.router"
 import socketHandler from "./socket"
 
+dotenv.config()
 const app = express()
 const server = createServer(app)
 const io = new Server(server, {
