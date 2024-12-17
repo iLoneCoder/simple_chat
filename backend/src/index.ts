@@ -34,8 +34,8 @@ app.use("*", (req: Request, res: Response) => {
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     const statusCode = err.statusCode ? err.statusCode : 500
-    
-    if (err.errors[0].type === "notNull Violation") {
+
+    if (err.errors && err.errors[0].type === "notNull Violation") {
         err.operational = true
     } 
     

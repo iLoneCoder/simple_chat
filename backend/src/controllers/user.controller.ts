@@ -1,16 +1,31 @@
 import { NextFunction, Request, Response } from "express";
 import { User } from "../db";
 import AppError from "../utils/appError";
+import { hashPassword } from "../utils/roomPassword";
 
 export async function createUser(req: Request, res: Response, next: NextFunction) {
     try {
-        const { username } = req.body
+        const { username, password, confirmPassword } = req.body
 
         if (!username) {
-            throw new Error("Username is required")
+            throw new AppError("username is required", 400)
         }
 
-        const user = await User.create({username})
+        if (!password) {
+            throw new AppError("password is required", 400)
+        }
+
+        if (!confirmPassword) {
+            throw new AppError("confirmPassword is required", 400)
+        }
+
+        if (password !== confirmPassword) {
+            throw new AppError("password and confirmPassword must match", 400)
+        }
+
+        const hashedPassword = await hashPassword(password)
+
+        const user = await User.create({username, password: hashedPassword})
 
         res.status(201).json({
             status: "success",

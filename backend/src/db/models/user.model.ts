@@ -6,6 +6,7 @@ import Room from "./room.model";
 class User extends Model {
     declare id: number
     declare username: string
+    declare password: string
     declare RoomMembers: RoomMember[]
     declare Rooms: Room[]
 
@@ -33,6 +34,10 @@ User.init({
         type: DataTypes.STRING,
         unique: true,
         allowNull: false
+    },
+    password: {
+        type: DataTypes.STRING,
+        allowNull: false
     }
 },
 {
@@ -40,7 +45,19 @@ User.init({
     modelName: "User",
     tableName: "users",
     createdAt: "created_at",
-    updatedAt: "updated_at"
+    updatedAt: "updated_at",
+    defaultScope: {
+        attributes: {
+            exclude: ["password"]
+        }
+    },
+    hooks: {
+        afterCreate: (user: User) => {
+            if (user.dataValues) {
+                delete user.dataValues.password
+            }
+        }
+    }
 })
 
 export default User
