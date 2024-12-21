@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { User } from "../db";
 import AppError from "../utils/appError";
-import { comparePasswords, generateToken, hashPassword } from "../utils/roomPassword";
+import { comparePasswords, generateToken, hashPassword, verifyTokenAsync } from "../utils/roomPassword";
 
 export async function createUser(req: Request, res: Response, next: NextFunction) {
     try {
@@ -60,12 +60,39 @@ export async function login(req: Request, res: Response, next: NextFunction) {
             throw new AppError("Username or Password incorrect", 400)
         }
 
-        const token = await generateToken(username)
+        const token = await generateToken(username, user.id)
         
         res.status(200).json({
             status: "success",
             token
         })
+    } catch (error) {
+        next(error)
+    }
+}
+
+export async function verifyUser(req: Request, res: Response, next: NextFunction) {
+    try {
+        const {authorization} = req.headers
+
+        if (!authorization) {
+            throw new AppError("Unauthorized", 400)
+        }
+
+        const token = authorization.replace("Bearer ", "")
+        if (!token) {
+            throw new AppError("Unauthorized", 400)
+        }
+
+        const decoded = await verifyTokenAsync(token)
+        const { id } = decoded
+        
+        const user = await User.findByPk(id)
+        if (!user) {
+            throw new AppError("Unauthorized", 400)
+        }
+
+        req.user = user
     } catch (error) {
         next(error)
     }

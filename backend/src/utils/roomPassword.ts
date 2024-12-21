@@ -21,17 +21,47 @@ async function comparePasswords(inputPassword: string, dbPassword: string): Prom
     return hashedPassword === dbPassword
 }
 
-async function generateToken(username: string): Promise<string> {
-    const secret = process.env.SECRET || "secret"
-    const token = await jwt.sign({
-        username
-    }, secret, {expiresIn: "7d"})
+async function generateToken(username: string, id: number): Promise<string> {
+    return new Promise((res, rej) => {
+        const secret = process.env.SECRET || "secret"
+        jwt.sign({
+            username,
+            id
+        }, secret, {expiresIn: "7d"}, (err, token) => {
+            if (err) rej(err)
+            
+            if (typeof token === "undefined") {
+                rej(new Error("token not generated"))
+                return
+            } 
+            
+            res(token)
+        })
 
-    return token
+    })
+}
+
+type decodedJWTType = {
+    id: number,
+    username: string,
+    iat: number,
+    exp: number
+}
+
+function verifyTokenAsync<T = decodedJWTType>(token: string): Promise<T> {
+    return new Promise((res, rej) => {
+        const secret = process.env.SECRET || "secret"
+        jwt.verify(token, secret, (err, decoded) => {
+            if (err) rej(err)
+            
+            res(decoded as T)
+        })
+    })
 }
 
 export {
     hashPassword,
     comparePasswords,
-    generateToken
+    generateToken,
+    verifyTokenAsync
 }
