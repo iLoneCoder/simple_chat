@@ -15,8 +15,8 @@ class RoomMember extends Model {
     };
 
     static associate() {
-        this.belongsTo(Room, {foreignKey: "id"})
-        this.belongsTo(User, {foreignKey: "id"})
+        this.belongsTo(Room, {foreignKey: "roomId"})
+        this.belongsTo(User, {foreignKey: "memberId"})
     }
 }
 

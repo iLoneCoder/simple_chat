@@ -76,12 +76,12 @@ export async function verifyUser(req: Request, res: Response, next: NextFunction
         const {authorization} = req.headers
 
         if (!authorization) {
-            throw new AppError("Unauthorized", 400)
+            throw new AppError("Unauthorized", 401)
         }
 
         const token = authorization.replace("Bearer ", "")
         if (!token) {
-            throw new AppError("Unauthorized", 400)
+            throw new AppError("Unauthorized", 401)
         }
 
         const decoded = await verifyTokenAsync(token)
@@ -89,10 +89,12 @@ export async function verifyUser(req: Request, res: Response, next: NextFunction
         
         const user = await User.findByPk(id)
         if (!user) {
-            throw new AppError("Unauthorized", 400)
+            throw new AppError("Unauthorized", 401)
         }
 
         req.user = user
+
+        next()
     } catch (error) {
         next(error)
     }

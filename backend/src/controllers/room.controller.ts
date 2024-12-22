@@ -44,21 +44,14 @@ export async function listRooms(req: Request, res: Response, next: NextFunction)
 export async function addMemberToRoom(req: Request, res: Response, next: NextFunction) {
     try {
         const { roomId } = req.params
-        const { memberId } = req.body
 
         const room = await Room.findByPk(roomId)
-        const user = await User.findByPk(memberId)
+
         if (!room) {
             throw new AppError("Room not found", 404)
         }
-
-        if (!user) {
-            throw new AppError("user not found", 404)
-        }
-
         
-        await room.addMember(user)
-
+        await room.addMember(req.user.id)
 
         res.status(201).json({
             status: "success",
@@ -73,26 +66,14 @@ export async function addMemberToRoom(req: Request, res: Response, next: NextFun
 export async function removeMemberFromRoom(req:Request, res:Response, next:NextFunction) {
     try {
         const { roomId } = req.params
-        const { memberId } = req.body
-
-        if (!memberId) {
-            throw new AppError("memberId is required", 400)
-        }
 
         const room = await Room.findByPk(roomId)
 
         if (!room) {
             throw new AppError("Room not found", 404)
         }
-
-        const user = await User.findByPk(memberId)
         
-        if (!user) {
-            throw new AppError("User not found", 404)
-        }
-
-        await room.removeMember(user)
-
+        await room.removeMember(req.user.id)
 
         res.status(204).json()
     } catch (error) {
@@ -121,26 +102,9 @@ export async function getRoomMembers(req: Request, res: Response, next: NextFunc
 
 export async function isMemberOfRoom(req: Request, res: Response, next: NextFunction) {
     try {
-        const { roomName, memberName } = req.params
-
-        const room = await getMemeberOfRoom(roomName, memberName)
-
-        res.status(200).json({
-            status: "success",
-            data: room
-        })
-    } catch (error) {
-        next(error)
-    }
-}
-
-export async function getRoomByName(req: Request, res: Response, next: NextFunction) {
-    try {
         const { roomName } = req.params
-        const room = await Room.findOne({where: {name: roomName}})
-        if (!room) {
-            throw new AppError("Room not found", 404)
-        }
+
+        const room = await getMemeberOfRoom(roomName, req.user.username)
 
         res.status(200).json({
             status: "success",

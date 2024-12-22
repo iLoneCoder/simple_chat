@@ -8,7 +8,7 @@
     "dev": "nodemon ./src/index.ts",
     "db:migrate": "sequelize-cli db:migrate --config ./src/db/config.sequelize.js --migrations-path ./src/db/migrations",
     "db:migration:generate": "sequelize-cli migration:generate --config ./src/db/config.sequelize.js --migrations-path ./src/db/migrations",
-    "db:migrate:undo": "sequelize-cli db:migrate:undo ./src/db/config.sequelize.js --migrations-path ./src/db/migrations",
+    "db:migrate:undo": "sequelize-cli db:migrate:undo --config ./src/db/config.sequelize.js --migrations-path ./src/db/migrations",
     "db:setup": "node db_setup.mjs"
   },
   "keywords": [],

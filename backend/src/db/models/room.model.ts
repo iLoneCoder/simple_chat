@@ -13,7 +13,7 @@ class Room extends Model {
     declare id: number
     declare name: string
     declare password: string
-    // declare RoomMembers: RoomMember[]
+    declare RoomMembers: RoomMember[]
     // declare Members: User[]
     declare members: User[]
 
@@ -23,7 +23,7 @@ class Room extends Model {
     declare removeMember: BelongsToManyRemoveAssociationMixin<User, number>
 
     static associations: { 
-        // RoomMembers: Association<Room, RoomMember>; 
+        RoomMembers: Association<Room, RoomMember>; 
         // Members: Association<Room, User>; 
         members: Association<Room, User>; 
     }

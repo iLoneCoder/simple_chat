@@ -7,14 +7,14 @@ class User extends Model {
     declare id: number
     declare username: string
     declare password: string
-    // declare RoomMembers: RoomMember[]
+    declare RoomMembers: RoomMember[]
     // declare Rooms: Room[]
     declare rooms: Room[]
 
     declare getRooms: BelongsToManyGetAssociationsMixin<Room>
 
     static associations: { 
-        // RoomMembers: Association<User, RoomMember>; 
+        RoomMembers: Association<User, RoomMember>; 
         // Room: Association<User, Room>;
         rooms: Association<User, Room>
     }
