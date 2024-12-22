@@ -5,6 +5,8 @@ import Chatbox from "../components/Chatbox"
 
 function Main() {
     const [username, setUsername] = useState("")
+    const [userPassword, setUserPassword] = useState("")
+    const [token, setToken] = useState("")
     const [room, setRoom] = useState("")
     const [userFromDb, setUserFromDb] = useState(null)
     const [disabledRoom, setDisabledRoom] = useState(true)
@@ -13,17 +15,18 @@ function Main() {
     const [newMessage, setNewMessage] = useState("")
 
     let socket = useRef(null)
-    useEffect(() => {
-        socket.current = io("http://localhost:8000", {
-            autoConnect: false
-        })
+    // useEffect(() => {
+    //     socket.current = io("http://localhost:8000", {
+    //         autoConnect: false,
+    //         auth
+    //     })
 
-        return () => {
-            if (socket.current) {
-                socket.current.disconnect()
-            }
-        }
-    }, [])
+    //     return () => {
+    //         if (socket.current) {
+    //             socket.current.disconnect()
+    //         }
+    //     }
+    // }, [])
 
     useEffect(() => {
          if (socket.current) {
@@ -63,18 +66,62 @@ function Main() {
 
     async function handleUserJoin() {
         try {
-            const response = await fetch(`http://localhost:8000/api/v1/user/${username}`)
+            if (!username || !userPassword) {
+                console.log("Provide credentials")
+                return
+            }
+
+            const response = await fetch("http://localhost:8000/api/v1/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    username,
+                    password: userPassword
+                })
+            })
+
             const data = await response.json()
             if (!response.ok) {
                 throw new Error(data.message)
             }
-            
-            setUserFromDb({...data.data})
-            setDisabledRoom(false)
-            
+
             if (socket.current) {
                 socket.current.emit("unsubscribe")
             }
+
+            setToken(data.token)
+            socket.current = io("http://localhost:8000", {
+                // autoConnect: false,
+                auth: {
+                    token: data.token
+                }
+            })
+
+            // Handle auth success
+            if (socket.current) {
+                function handleConnection(message) {
+                    console.log(message)
+                    setDisabledRoom(false)
+                    setMessages([{
+                        type: "announcement",
+                        text: message
+                    }])
+                }
+    
+                socket.current.on("authenticated", handleConnection)
+            
+            }
+
+            // Handle auth error
+            if (socket.current) {
+                socket.current.on("connect_error", (error) => {
+                    console.log(error, 123)
+                    setDisabledRoom(true)
+                })
+            }
+            
         } catch (error) {
             console.log(error)
         }
@@ -105,7 +152,13 @@ function Main() {
         <div className="form-wrapper">
             <div className="form">
                 <label className="form-label" htmlFor="username">Username: </label>
-                <input type="text" className="form-input" id="username" onChange={(e) => setUsername(e.target.value)}/>
+                <input type="text" className="form-input" id="username" value={username} onChange={(e) => setUsername(e.target.value)}/>
+            </div>
+        </div>
+        <div className="form-wrapper">
+            <div className="form">
+                <label className="form-label" htmlFor="user-password">Password: </label>
+                <input type="text" className="form-input" id="user-password" value={userPassword} onChange={(e) => setUserPassword(e.target.value)}/>
                 <button onClick={handleUserJoin}>Join</button>
             </div>
         </div>

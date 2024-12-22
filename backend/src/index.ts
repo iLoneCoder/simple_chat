@@ -6,6 +6,7 @@ import cors from "cors"
 import userRouter from "./routes/user.router"
 import roomRouter from "./routes/room.router"
 import socketHandler from "./socket"
+import { verifySockerRequester } from "./socket/middlewares"
 
 dotenv.config()
 const app = express()
@@ -22,6 +23,8 @@ app.use(express.json())
 
 app.use("/api/v1", userRouter)
 app.use("/api/v1", roomRouter)
+
+io.use(verifySockerRequester)
 
 io.on("connection", (socket) => {
     socketHandler(socket, io)

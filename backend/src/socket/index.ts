@@ -3,6 +3,8 @@ import { getMemeberOfRoom } from "../commands/room";
 
 export default function socketHandler(socket: Socket, io: Server) {
     console.log("user connected: ", socket.id)
+    socket.emit("authenticated", "Hello, you area logged in")
+    
     socket.on("send-message", (messageObj: {username: string, room: string, message: string}) => {
         if (messageObj.room) {
             socket.to(messageObj.room).emit("receive-message", {username: messageObj.username, type: "message", text: messageObj.message})
