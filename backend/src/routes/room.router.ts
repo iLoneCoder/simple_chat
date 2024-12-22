@@ -9,6 +9,6 @@ route.get("/rooms", verifyUser, listRooms)
 route.post("/room/:roomId/member", verifyUser, addMemberToRoom)
 route.delete("/room/:roomId/member", verifyUser, removeMemberFromRoom)
 route.get("/room/:roomId/members", verifyUser, getRoomMembers)
-route.get("/room/:roomName/member/", verifyUser, isMemberOfRoom)
+route.post("/room/:roomName", verifyUser, isMemberOfRoom)
 
 export default route

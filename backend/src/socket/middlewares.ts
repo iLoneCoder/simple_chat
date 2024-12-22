@@ -2,7 +2,7 @@ import { ExtendedError, Socket } from "socket.io";
 import { verifyTokenAsync } from "../utils/roomPassword";
 import { JsonWebTokenError } from "jsonwebtoken";
 
-export async function verifySockerRequester(socket: Socket, next: (err?: ExtendedError) => void) {
+export async function verifySocketRequester(socket: Socket, next: (err?: ExtendedError) => void) {
     try {
         const token = socket.handshake.auth.token
         await verifyTokenAsync(token)

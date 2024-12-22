@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { Room, User } from "../db";
 import AppError from "../utils/appError";
 import { getMemeberOfRoom } from "../commands/room";
-import { hashPassword } from "../utils/roomPassword";
+import { comparePasswords, hashPassword } from "../utils/roomPassword";
 
 export async function createRoom(req: Request, res: Response, next: NextFunction) {
     try {
@@ -44,13 +44,23 @@ export async function listRooms(req: Request, res: Response, next: NextFunction)
 export async function addMemberToRoom(req: Request, res: Response, next: NextFunction) {
     try {
         const { roomId } = req.params
+        const { password } = req.body
 
-        const room = await Room.findByPk(roomId)
+        if (!password) {
+            throw new AppError("password is required", 400)
+        }
 
+        const room = await Room.scope("withPassword").findByPk(roomId)
         if (!room) {
             throw new AppError("Room not found", 404)
         }
         
+        const passwordCorrect = await comparePasswords(password, room.password)
+
+        if (!passwordCorrect) {
+            throw new AppError("Incorrect password", 400)
+        }
+
         await room.addMember(req.user.id)
 
         res.status(201).json({
@@ -103,8 +113,13 @@ export async function getRoomMembers(req: Request, res: Response, next: NextFunc
 export async function isMemberOfRoom(req: Request, res: Response, next: NextFunction) {
     try {
         const { roomName } = req.params
+        const { password } = req.body
 
-        const room = await getMemeberOfRoom(roomName, req.user.username)
+        if (!password) {
+            throw new AppError("password is required", 400)
+        }
+
+        const room = await getMemeberOfRoom(roomName, req.user.username, password)
 
         res.status(200).json({
             status: "success",

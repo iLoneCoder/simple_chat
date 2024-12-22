@@ -1,8 +1,9 @@
 import { Room } from "../db";
 import AppError from "../utils/appError";
+import { comparePasswords } from "../utils/roomPassword";
 
-export async function getMemeberOfRoom(roomName: string, memberName: string): Promise<Room> {
-    const room = await Room.findOne({
+export async function getMemeberOfRoom(roomName: string, memberName: string, password: string): Promise<boolean> {
+    const room = await Room.scope("withPassword").findOne({
         where: {
             name: roomName
         },
@@ -21,5 +22,11 @@ export async function getMemeberOfRoom(roomName: string, memberName: string): Pr
         throw new AppError("Room not found or you aren't room member", 404)
     }
 
-    return room
+    const passwordCorrect = await comparePasswords(password, room.password)
+    if (!passwordCorrect) {
+        throw new AppError("Incorrect passowrd", 400)
+    }
+ 
+
+    return true
 }

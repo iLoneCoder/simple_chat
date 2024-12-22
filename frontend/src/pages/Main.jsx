@@ -8,6 +8,7 @@ function Main() {
     const [userPassword, setUserPassword] = useState("")
     const [token, setToken] = useState("")
     const [room, setRoom] = useState("")
+    const [roomPassword, setRoomPassword] = useState("")
     const [userFromDb, setUserFromDb] = useState(null)
     const [disabledRoom, setDisabledRoom] = useState(true)
     const [disabledMessage, setDisabledMessage] = useState(true)
@@ -15,19 +16,6 @@ function Main() {
     const [newMessage, setNewMessage] = useState("")
 
     let socket = useRef(null)
-    // useEffect(() => {
-    //     socket.current = io("http://localhost:8000", {
-    //         autoConnect: false,
-    //         auth
-    //     })
-
-    //     return () => {
-    //         if (socket.current) {
-    //             socket.current.disconnect()
-    //         }
-    //     }
-    // }, [])
-
     useEffect(() => {
          if (socket.current) {
             function handleReceiveMessage(message) {
@@ -117,7 +105,7 @@ function Main() {
             // Handle auth error
             if (socket.current) {
                 socket.current.on("connect_error", (error) => {
-                    console.log(error, 123)
+                    console.log(error)
                     setDisabledRoom(true)
                 })
             }
@@ -129,7 +117,6 @@ function Main() {
 
     async function handleRoomJoin() {
         try {
-            socket.current.connect()
             socket.current.emit("join-room", {room, username})
         } catch (error) {
             console.log(error)
@@ -166,6 +153,12 @@ function Main() {
             <div className="form">
                 <label className="form-label" htmlFor="room">room: </label>
                 <input type="text" className="form-input" id="room" onChange={(e) => setRoom(e.target.value)} disabled={disabledRoom}/>
+            </div>
+        </div>
+        <div className="form-wrapper">
+            <div className="form">
+                <label className="form-label" htmlFor="room">R pass: </label>
+                <input type="text" className="form-input" id="room" value={roomPassword} onChange={(e) => setRoomPassword(e.target.value)} disabled={disabledRoom}/>
                 <button onClick={handleRoomJoin} disabled={disabledRoom}>Join</button>
             </div>
         </div>
