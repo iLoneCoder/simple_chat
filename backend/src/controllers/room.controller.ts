@@ -106,6 +106,29 @@ export async function removeMemberFromRoom(req:Request, res:Response, next:NextF
     }
 }
 
+export async function leaveRoom(req: Request, res: Response, next: NextFunction) {
+    try {
+        const { roomId } = req.params
+        const { roomName, roomPassword } = req.body
+        
+        if (!roomName) {
+            throw new AppError("roomName is required", 400)
+        }
+        
+        if (!roomPassword) {
+            throw new AppError("roomPassword is required", 400)
+        }
+
+        await getMemeberOfRoom(roomName, req.user.username, roomPassword)
+
+        const room = await req.user.removeRoom(+roomId)
+        console.log(room)
+        res.status(204).json()
+    } catch (error) {
+        next(error)
+    }
+}
+
 export async function getRoomMembers(req: Request, res: Response, next: NextFunction) {
     try {
         const { roomId } = req.params
