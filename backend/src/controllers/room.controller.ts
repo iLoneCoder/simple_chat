@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { Room, User } from "../db";
+import { Room, RoomMember, User } from "../db";
 import AppError from "../utils/appError";
 import { getMemeberOfRoom } from "../commands/room";
 import { comparePasswords, hashPassword } from "../utils/roomPassword";
@@ -76,6 +76,21 @@ export async function addMemberToRoom(req: Request, res: Response, next: NextFun
 export async function removeMemberFromRoom(req:Request, res:Response, next:NextFunction) {
     try {
         const { roomId } = req.params
+        const { memberId, roomName, roomPassword } = req.body 
+
+        if (!memberId) {
+            throw new AppError("memberId is required", 400)
+        }
+
+        if (!roomName) {
+            throw new AppError("roomName is required", 400)
+        }
+
+        if (!roomPassword) {
+            throw new AppError("roomPassword is required", 400)
+        }
+
+        await getMemeberOfRoom(roomName, req.user.username, roomPassword)
 
         const room = await Room.findByPk(roomId)
 
@@ -83,7 +98,7 @@ export async function removeMemberFromRoom(req:Request, res:Response, next:NextF
             throw new AppError("Room not found", 404)
         }
         
-        await room.removeMember(req.user.id)
+        await room.removeMember(memberId)
 
         res.status(204).json()
     } catch (error) {
@@ -94,6 +109,17 @@ export async function removeMemberFromRoom(req:Request, res:Response, next:NextF
 export async function getRoomMembers(req: Request, res: Response, next: NextFunction) {
     try {
         const { roomId } = req.params
+        const { roomPassword, roomName } = req.body
+
+        if (!roomName) {
+            throw new AppError("roomName is required", 400)
+        }
+
+        if (!roomPassword) {
+            throw new AppError("roomPassword is required", 400)
+        }
+
+        await getMemeberOfRoom(roomName, req.user.username, roomPassword)
 
         const roomMembers = await Room.findByPk(roomId, { include: { association: "members", through: {attributes: []} }})
 
