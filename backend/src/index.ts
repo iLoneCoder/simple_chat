@@ -42,7 +42,12 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 
     if (err.errors && err.errors[0].type === "notNull Violation") {
         err.operational = true
-    } 
+    }
+    
+    if (err.errors && err.errors[0].type === "unique violation") {
+        err.operational = true
+        err.message = err.errors[0].message
+    }
     
     console.log(err)
         

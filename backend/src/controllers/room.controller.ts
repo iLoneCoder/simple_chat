@@ -6,22 +6,43 @@ import { comparePasswords, hashPassword } from "../utils/roomPassword";
 
 export async function createRoom(req: Request, res: Response, next: NextFunction) {
     try {
-        const { name, password } = req.body
+        const { name, password, isProtected } = req.body
 
         if (!name) {
             throw new AppError("name is required", 400)
         }
 
-        if (!password) {
+        if (isProtected === undefined || isProtected === null) {
+            throw new AppError("isProtected is required", 400)
+        }
+
+        if (isProtected && !password) {
             throw new AppError("password is required", 400)
         }
 
-        const hashedPassword = await hashPassword(password)
-        const room = await Room.create({ name, password: hashedPassword })
+        let hashedPassword: string
+        type Options = {
+            name: string,
+            isProtected: boolean,
+            password: string | null
+        }
+        
+        const options: Options = {
+            name,
+            isProtected,
+            password: null
+        }
+
+        if (password) {
+            hashedPassword = await hashPassword(password)
+            options.password = hashedPassword
+        }
+
+        const room = await Room.create(options)
 
         res.status(201).json({
             status: "success",
-            data: room
+            data: "room"
         })
     } catch (error) {
         next(error)

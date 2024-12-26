@@ -13,6 +13,7 @@ class Room extends Model {
     declare id: number
     declare name: string
     declare password: string
+    declare isProtected: boolean
     declare RoomMembers: RoomMember[]
     // declare Members: User[]
     declare members: User[]
@@ -47,7 +48,12 @@ Room.init({
     },
     password: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
+    },
+    isProtected: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+        field: "is_protected"
     }
 },
 {
