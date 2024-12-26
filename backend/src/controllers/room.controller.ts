@@ -26,14 +26,14 @@ export async function createRoom(req: Request, res: Response, next: NextFunction
             isProtected: boolean,
             password: string | null
         }
-        
+
         const options: Options = {
             name,
             isProtected,
             password: null
         }
 
-        if (password) {
+        if (isProtected && password) {
             hashedPassword = await hashPassword(password)
             options.password = hashedPassword
         }
@@ -42,7 +42,7 @@ export async function createRoom(req: Request, res: Response, next: NextFunction
 
         res.status(201).json({
             status: "success",
-            data: "room"
+            data: room
         })
     } catch (error) {
         next(error)
@@ -67,18 +67,23 @@ export async function addMemberToRoom(req: Request, res: Response, next: NextFun
         const { roomId } = req.params
         const { password } = req.body
 
-        if (!password) {
-            throw new AppError("password is required", 400)
-        }
-
+        
         const room = await Room.scope("withPassword").findByPk(roomId)
         if (!room) {
             throw new AppError("Room not found", 404)
         }
         
-        const passwordCorrect = await comparePasswords(password, room.password)
+        if (room.isProtected && !password) {
+            throw new AppError("password is required", 400)
+        }
 
-        if (!passwordCorrect) {
+        let passwordCorrect: boolean = false
+
+        if (room.isProtected && password) {
+            passwordCorrect = await comparePasswords(password, room.password)
+        }
+
+        if (room.isProtected && !passwordCorrect) {
             throw new AppError("Incorrect password", 400)
         }
 
