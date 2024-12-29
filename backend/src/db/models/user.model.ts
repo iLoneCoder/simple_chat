@@ -13,7 +13,7 @@ class User extends Model {
 
     declare getRooms: BelongsToManyGetAssociationsMixin<Room>
     declare removeRoom: BelongsToManyRemoveAssociationMixin<Room, number>
-    
+
     static associations: { 
         RoomMembers: Association<User, RoomMember>; 
         // Room: Association<User, Room>;

@@ -102,28 +102,44 @@ export async function addMemberToRoom(req: Request, res: Response, next: NextFun
 export async function removeMemberFromRoom(req:Request, res:Response, next:NextFunction) {
     try {
         const { roomId } = req.params
-        const { memberId, roomName, roomPassword } = req.body 
+        const { memberId, roomPassword } = req.body 
+
+        if (isNaN(+roomId)) {
+            throw new AppError("roomId must be a number", 400)
+        }
 
         if (!memberId) {
             throw new AppError("memberId is required", 400)
         }
 
-        if (!roomName) {
-            throw new AppError("roomName is required", 400)
-        }
-
-        if (!roomPassword) {
-            throw new AppError("roomPassword is required", 400)
-        }
-
-        await getMemeberOfRoom(roomName, req.user.username, roomPassword)
-
-        const room = await Room.findByPk(roomId)
+        const room = await Room.scope("withPassword").findByPk(roomId, {
+            include: {
+                association: "members",
+                where: {
+                    id:  req.user.id
+                },
+                through: {
+                    attributes: []
+                }
+            }
+        })
 
         if (!room) {
             throw new AppError("Room not found", 404)
         }
+
+        if (room.isProtected && !roomPassword) {
+            throw new AppError("roomPassword is required", 400)
+        }
         
+        if (room.isProtected) {
+            const passwordCorrect = await comparePasswords(roomPassword, room.password)
+
+            if (!passwordCorrect) {
+                throw new AppError("wrong password", 401)
+            }
+        }
+
         await room.removeMember(memberId)
 
         res.status(204).json()
@@ -135,20 +151,12 @@ export async function removeMemberFromRoom(req:Request, res:Response, next:NextF
 export async function leaveRoom(req: Request, res: Response, next: NextFunction) {
     try {
         const { roomId } = req.params
-        const { roomName, roomPassword } = req.body
-        
-        if (!roomName) {
-            throw new AppError("roomName is required", 400)
-        }
-        
-        if (!roomPassword) {
-            throw new AppError("roomPassword is required", 400)
+
+        const isMember = await RoomMember.findOne({ where: { roomId, memberId: req.user.id }})
+        if (isMember) {
+            await req.user.removeRoom(+roomId)
         }
 
-        await getMemeberOfRoom(roomName, req.user.username, roomPassword)
-
-        const room = await req.user.removeRoom(+roomId)
-        console.log(room)
         res.status(204).json()
     } catch (error) {
         next(error)
@@ -158,17 +166,13 @@ export async function leaveRoom(req: Request, res: Response, next: NextFunction)
 export async function getRoomMembers(req: Request, res: Response, next: NextFunction) {
     try {
         const { roomId } = req.params
-        const { roomPassword, roomName } = req.body
+        const { roomPassword } = req.body
 
-        if (!roomName) {
-            throw new AppError("roomName is required", 400)
+        if (isNaN(+roomId)) {
+            throw new AppError("roomId must be number", 400)
         }
 
-        if (!roomPassword) {
-            throw new AppError("roomPassword is required", 400)
-        }
-
-        await getMemeberOfRoom(roomName, req.user.username, roomPassword)
+        await getMemeberOfRoom(+roomId, req.user.username, roomPassword)
 
         const roomMembers = await Room.findByPk(roomId, { include: { association: "members", through: {attributes: []} }})
 
@@ -185,16 +189,16 @@ export async function getRoomMembers(req: Request, res: Response, next: NextFunc
     }
 }
 
-export async function isMemberOfRoom(req: Request, res: Response, next: NextFunction) {
+export async function isMemberOfRoom(req: Request<any, any, {password: string}>, res: Response, next: NextFunction) {
     try {
-        const { roomName } = req.params
+        const { roomId } = req.params
         const { password } = req.body
 
-        if (!password) {
-            throw new AppError("password is required", 400)
+        if (isNaN(+roomId)) {
+            throw new AppError("roomId must be number", 400)
         }
 
-        const room = await getMemeberOfRoom(roomName, req.user.username, password)
+        const room = await getMemeberOfRoom(+roomId, req.user.username, password)
 
         res.status(200).json({
             status: "success",

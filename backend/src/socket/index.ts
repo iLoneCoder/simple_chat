@@ -13,7 +13,7 @@ export default function socketHandler(socket: Socket, io: Server) {
 
     socket.on("join-room", async (joinData:{room: string, username: string, password: string}) => {
         try {
-            await getMemeberOfRoom(joinData.room, joinData.username, joinData.password)            
+            await getMemeberOfRoom(+joinData.room, joinData.username, joinData.password)   
             socket.join(joinData.room)
             io.to(joinData.room).emit("response_on_join", {
                 type: "announcement",

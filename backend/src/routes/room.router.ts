@@ -17,6 +17,6 @@ route.post("/room/:roomId/member", verifyUser, addMemberToRoom)
 route.delete("/room/:roomId/member", verifyUser, removeMemberFromRoom)
 route.post("/room/:roomId/user", verifyUser, leaveRoom)
 route.post("/room/:roomId/members", verifyUser, getRoomMembers)
-route.post("/room/:roomName", verifyUser, isMemberOfRoom)
+route.post("/room/:roomId", verifyUser, isMemberOfRoom)
 
 export default route

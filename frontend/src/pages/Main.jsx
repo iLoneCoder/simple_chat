@@ -30,7 +30,7 @@ function Main() {
             }
         }
 
-    }, [])
+    }, [socket.current])
 
 
     useEffect(() => {
@@ -50,7 +50,7 @@ function Main() {
                 socket.current.off("response_on_join", handleResponseOnJoin)
             }
         }
-    }, [])
+    }, [socket.current])
 
     async function handleUserJoin() {
         try {
@@ -117,7 +117,7 @@ function Main() {
 
     async function handleRoomJoin() {
         try {
-            socket.current.emit("join-room", {room, username})
+            socket.current.emit("join-room", {room, username, password: roomPassword})
         } catch (error) {
             console.log(error)
         }
