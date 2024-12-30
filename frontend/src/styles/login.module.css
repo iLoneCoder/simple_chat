@@ -1,0 +1,12 @@
+.formContainer {
+    width: 300px;
+}
+
+.formLabel {
+    display: inline-block;
+    width: 90px;
+}
+
+.formGroup {
+    display: flex;
+}
