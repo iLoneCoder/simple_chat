@@ -1,6 +1,8 @@
 import "../styles/main.css"
 import  { useState, useEffect, useRef } from "react"
 import { io } from "socket.io-client"
+import { useDispatch } from "react-redux"
+import { logout } from "../features/auth/authSlice"
 import Chatbox from "../components/Chatbox"
 
 function Main() {
@@ -16,6 +18,7 @@ function Main() {
     const [newMessage, setNewMessage] = useState("")
 
     let socket = useRef(null)
+    const dispatch = useDispatch()
     useEffect(() => {
          if (socket.current) {
             function handleReceiveMessage(message) {
@@ -134,6 +137,10 @@ function Main() {
         }
     }
 
+    function handleLogout() {
+        dispatch(logout())
+    }
+
     return (<>
         <Chatbox messages={messages}/>
         <div className="form-wrapper">
@@ -169,6 +176,7 @@ function Main() {
                 <button disabled={disabledMessage} onClick={handleSendMessage}>Send</button>
             </div>
         </div>
+        <button onClick={handleLogout}>Logout</button>
     </>)
 }
 

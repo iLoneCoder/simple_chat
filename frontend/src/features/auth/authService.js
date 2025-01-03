@@ -12,6 +12,11 @@ async function login(userData) {
     return response.data
 }
 
+async function logout() {
+    localStorage.removeItem("user")
+}
+
 export default {
-    login
+    login,
+    logout
 }

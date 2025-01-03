@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { useNavigate } from "react-router"
 import { useSelector, useDispatch } from "react-redux"
 import { login, reset } from "../features/auth/authSlice"
@@ -6,7 +6,7 @@ import styles from "../styles/login.module.css"
 
 function Login() {
     const [formData, setFormData] = useState({username: "", password: ""})
-    const { isSuccess, isError, message } = useSelector(state => state.auth)
+    const { user, isSuccess, isError, message, isLoading } = useSelector(state => state.auth)
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
@@ -15,12 +15,12 @@ function Login() {
             console.log(message)
         }
 
-        if (isSuccess) {
+        if (user || isSuccess) {
             navigate("/")
         }
 
         dispatch(reset())
-    }, [isSuccess, isError, message])
+    }, [isSuccess, isError, message, user])
 
     function handleChange(e) {
         setFormData(prevState => ({
@@ -37,6 +37,11 @@ function Login() {
         }
         
     }
+
+    if(user && isLoading) {
+        return <div>LOADING...</div>
+    }
+    
     return <>
         <div className={styles.formContainer}>
             <h1>Login user</h1>

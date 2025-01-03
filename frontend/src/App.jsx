@@ -5,6 +5,7 @@ import { useEffect } from "react"
 import { BrowserRouter, Routes, Route } from "react-router"
 import Main from './pages/Main';
 import Login from './pages/Login';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
 
@@ -12,7 +13,10 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path='/login' element={<Login />}/>
-        <Route path='/' element={<Main />} />
+        
+        <Route path="/" element={<ProtectedRoute />}>
+          <Route path='/' element={<Main />} />
+        </Route>
       </Routes>
   
     </BrowserRouter>
