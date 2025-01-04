@@ -3,6 +3,14 @@ import AppError from "../utils/appError";
 import { comparePasswords } from "../utils/roomPassword";
 
 export async function getMemeberOfRoom(roomId: number, memberName: string, password: string): Promise<boolean> {
+    if (!memberName) {
+        throw new AppError("memberName is required", 400)
+    }
+
+    if (!roomId) {
+        throw new AppError("roomId is required", 400)
+    }
+
     const room = await Room.scope("withPassword").findByPk(roomId, {        
         include: {
             association: "members",

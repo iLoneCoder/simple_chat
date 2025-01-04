@@ -1,5 +1,6 @@
 import { Socket, Server } from "socket.io";
 import { getMemeberOfRoom } from "../commands/room";
+import { getSetValueByIndex } from "../utils/helpers";
 
 export default function socketHandler(socket: Socket, io: Server) {
     console.log("user connected: ", socket.id)
@@ -14,7 +15,15 @@ export default function socketHandler(socket: Socket, io: Server) {
     socket.on("join-room", async (joinData:{room: string, username: string, password: string}) => {
         try {
             await getMemeberOfRoom(+joinData.room, joinData.username, joinData.password)   
+            // leave previous room
+            if (socket.rooms.size === 2) {
+                const prevRoom = getSetValueByIndex(socket.rooms, 1)
+                if (prevRoom) {
+                    socket.leave(prevRoom)
+                }
+            }
             socket.join(joinData.room)
+
             io.to(joinData.room).emit("response_on_join", {
                 type: "announcement",
                 text: `${joinData.username} joined room ${joinData.room}`

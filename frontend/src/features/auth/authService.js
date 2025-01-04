@@ -1,5 +1,5 @@
 import axios from "axios"
-
+import { jwtDecode } from "jwt-decode"
 const API_URL = "/api/v1"
 
 async function login(userData) {
@@ -9,7 +9,9 @@ async function login(userData) {
         localStorage.setItem("user", JSON.stringify(response.data))
     }
 
-    return response.data
+    const token = response.data.token
+
+    return jwtDecode(token)
 }
 
 async function logout() {
