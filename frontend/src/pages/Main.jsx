@@ -4,7 +4,7 @@ import { io } from "socket.io-client"
 import { useDispatch, useSelector } from "react-redux"
 import { logout } from "../features/auth/authSlice"
 import Chatbox from "../components/Chatbox"
-import * as openpgp from "openpgp"
+import { generateKeyPair } from "../utils/helpers"
 
 function Main() {
     const [username, setUsername] = useState("")
@@ -151,33 +151,45 @@ function Main() {
     //     }
     // }
 
-    async function generateKeyPair() {
-        const { privateKey: privateKeyArmored, publicKey: publicKeyArmored } = await openpgp.generateKey({
-            type: "rsa",
-            rsaBits: 4096,
-            userIDs: [{ name: user.username}]
-        })
+    // async function generateKeyPair() {
+    //     const { privateKey: privateKeyArmored, publicKey: publicKeyArmored } = await openpgp.generateKey({
+    //         type: "rsa",
+    //         rsaBits: 4096,
+    //         userIDs: [{ name: user.username}]
+    //     })
 
-        console.log({privateKeyArmored, publicKeyArmored})
+    //     console.log({privateKeyArmored, publicKeyArmored})
 
-        const text = "Hello, World! 213"
+    //     const text = "Hello, World! 213"
 
-        const publicKey = await openpgp.readKey({armoredKey: publicKeyArmored})
-        const privateKey = await openpgp.readPrivateKey({armoredKey: privateKeyArmored})
-        const encryptedMessage = await openpgp.encrypt({
-            message: await openpgp.createMessage({text}),
-            encryptionKeys: publicKey
-        })
+    //     const publicKey = await openpgp.readKey({armoredKey: publicKeyArmored})
+    //     const privateKey = await openpgp.readPrivateKey({armoredKey: privateKeyArmored})
+    //     const encryptedMessage = await openpgp.encrypt({
+    //         message: await openpgp.createMessage({text}),
+    //         encryptionKeys: publicKey
+    //     })
 
-        console.log({encryptedMessage})
+    //     console.log({encryptedMessage})
 
-        const decryptedMessage = await openpgp.decrypt({
-            decryptionKeys: privateKey,
-            message: await openpgp.readMessage({armoredMessage: encryptedMessage})
-        })
+    //     const decryptedMessage = await openpgp.decrypt({
+    //         decryptionKeys: privateKey,
+    //         message: await openpgp.readMessage({armoredMessage: encryptedMessage})
+    //     })
 
-        console.log({decryptedMessage})
-    }
+    //     console.log({decryptedMessage})
+
+        // create txt file with public key in it
+        // const element = document.createElement("a")
+        // const file = new Blob([publicKeyArmored], {type: "text/plain"})
+        // const url = URL.createObjectURL(file)
+
+        // element.href = url
+        // element.download = `publicKeyArmored${user.username}.txt`
+        // element.click()
+
+        // URL.revokeObjectURL(url)
+
+    // }
 
 
     async function handleRoomJoin() {
@@ -201,6 +213,10 @@ function Main() {
 
     function handleLogout() {
         dispatch(logout())
+    }
+
+    async function handleGenerateKeyPair() {
+        await generateKeyPair(user)
     }
 
     return (<>
@@ -238,7 +254,7 @@ function Main() {
                 <button disabled={disabledMessage} onClick={handleSendMessage}>Send</button>
             </div>
         </div>
-        <button onClick={generateKeyPair}>Generate keypair</button>
+        <button onClick={handleGenerateKeyPair}>Generate keypair</button>
         <button onClick={handleLogout}>Logout</button>
     </>)
 }
