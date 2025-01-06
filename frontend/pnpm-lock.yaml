@@ -17,6 +17,9 @@ dependencies:
   jwt-decode:
     specifier: ^4.0.0
     version: 4.0.0
+  openpgp:
+    specifier: ^6.0.1
+    version: 6.0.1
   react:
     specifier: ^19.0.0
     version: 19.0.0
@@ -7454,6 +7457,11 @@ packages:
       define-lazy-prop: 2.0.0
       is-docker: 2.2.1
       is-wsl: 2.2.0
+    dev: false
+
+  /openpgp@6.0.1:
+    resolution: {integrity: sha512-3lReDKjgWsKFArZT4Y/yj7/Q0q6/VhXarn4WqKEkyiBWckNjrThSGoB1t0IKo3Ke0ClvBpyQfTwumkGUkxOwww==}
+    engines: {node: '>= 18.0.0'}
     dev: false
 
   /optionator@0.8.3:

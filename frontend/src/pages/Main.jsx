@@ -1,9 +1,10 @@
 import "../styles/main.css"
-import  { useState, useEffect, useRef } from "react"
+import  { useState, useEffect, useRef, use } from "react"
 import { io } from "socket.io-client"
 import { useDispatch, useSelector } from "react-redux"
 import { logout } from "../features/auth/authSlice"
 import Chatbox from "../components/Chatbox"
+import * as openpgp from "openpgp"
 
 function Main() {
     const [username, setUsername] = useState("")
@@ -150,6 +151,35 @@ function Main() {
     //     }
     // }
 
+    async function generateKeyPair() {
+        const { privateKey: privateKeyArmored, publicKey: publicKeyArmored } = await openpgp.generateKey({
+            type: "rsa",
+            rsaBits: 4096,
+            userIDs: [{ name: user.username}]
+        })
+
+        console.log({privateKeyArmored, publicKeyArmored})
+
+        const text = "Hello, World! 213"
+
+        const publicKey = await openpgp.readKey({armoredKey: publicKeyArmored})
+        const privateKey = await openpgp.readPrivateKey({armoredKey: privateKeyArmored})
+        const encryptedMessage = await openpgp.encrypt({
+            message: await openpgp.createMessage({text}),
+            encryptionKeys: publicKey
+        })
+
+        console.log({encryptedMessage})
+
+        const decryptedMessage = await openpgp.decrypt({
+            decryptionKeys: privateKey,
+            message: await openpgp.readMessage({armoredMessage: encryptedMessage})
+        })
+
+        console.log({decryptedMessage})
+    }
+
+
     async function handleRoomJoin() {
         try {
             socket.current.emit("join-room", {room,username: user.username, password: roomPassword})
@@ -208,6 +238,7 @@ function Main() {
                 <button disabled={disabledMessage} onClick={handleSendMessage}>Send</button>
             </div>
         </div>
+        <button onClick={generateKeyPair}>Generate keypair</button>
         <button onClick={handleLogout}>Logout</button>
     </>)
 }
