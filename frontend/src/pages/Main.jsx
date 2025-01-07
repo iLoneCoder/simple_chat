@@ -4,7 +4,12 @@ import { io } from "socket.io-client"
 import { useDispatch, useSelector } from "react-redux"
 import { logout } from "../features/auth/authSlice"
 import Chatbox from "../components/Chatbox"
-import { generateKeyPair } from "../utils/helpers"
+import { 
+    generateKeyPair,
+    handleFileRead,
+    encryptMessage,
+    decryptMessage
+    } from "../utils/helpers"
 
 function Main() {
     const [username, setUsername] = useState("")
@@ -17,6 +22,8 @@ function Main() {
     const [disabledMessage, setDisabledMessage] = useState(true)
     const [messages, setMessages] = useState([])
     const [newMessage, setNewMessage] = useState("")
+    const [publicKeyArmored, setPublicKeyAromored] = useState("")
+    const [privateKeyArmored, setPrivateKeyArmored] = useState("")
 
     const { user } = useSelector(state => state.auth)
 
@@ -39,7 +46,7 @@ function Main() {
             setDisabledRoom(false)
             setMessages([{
                 type: "announcement",
-                text: message
+                text: `${user.username} ${message}`
             }])
         }
 
@@ -54,8 +61,26 @@ function Main() {
 
     useEffect(() => {
          if (socket.current) {
-            function handleReceiveMessage(message) {
-                setMessages(prevMessages => [...prevMessages, message])
+            async function handleReceiveMessage(message) {
+                console.log({publicKeyArmored})
+                console.log({privateKeyArmored})
+                if (message.type === "message") {
+                    if (!privateKeyArmored) {
+                        // setMessages(prevMessages => [...prevMessages, {
+                        //     type: "message",
+                        //     text: "Private key is empty, and can't decrypt message123"
+                        // }])
+                    } else {
+                        const decryptedMessage = await decryptMessage(message.text, privateKeyArmored)
+                        setMessages(prevMessages => [...prevMessages, {
+                            type: "message",
+                            text: decryptedMessage
+                        }])
+                    }
+                    
+                } else {
+                    setMessages(prevMessages => [...prevMessages, message])
+                }
             }
             
             socket.current.on("receive-message", handleReceiveMessage)
@@ -66,7 +91,7 @@ function Main() {
             }
         }
 
-    }, [socket.current])
+    }, [socket.current, publicKeyArmored, privateKeyArmored])
 
 
     useEffect(() => {
@@ -88,110 +113,6 @@ function Main() {
         }
     }, [socket.current])
 
-    // async function handleUserJoin() {
-    //     try {
-    //         if (!username || !userPassword) {
-    //             console.log("Provide credentials")
-    //             return
-    //         }
-
-    //         const response = await fetch("http://localhost:8000/api/v1/login", {
-    //             method: "POST",
-    //             headers: {
-    //                 "Content-Type": "application/json"
-    //             },
-    //             body: JSON.stringify({
-    //                 username,
-    //                 password: userPassword
-    //             })
-    //         })
-
-    //         const data = await response.json()
-    //         if (!response.ok) {
-    //             throw new Error(data.message)
-    //         }
-
-    //         if (socket.current) {
-    //             socket.current.emit("unsubscribe")
-    //         }
-
-    //         setToken(data.token)
-    //         socket.current = io("http://localhost:8000", {
-    //             // autoConnect: false,
-    //             auth: {
-    //                 token: data.token
-    //             }
-    //         })
-
-    //         // Handle auth success
-    //         if (socket.current) {
-    //             function handleConnection(message) {
-    //                 console.log(message)
-    //                 setDisabledRoom(false)
-    //                 setMessages([{
-    //                     type: "announcement",
-    //                     text: message
-    //                 }])
-    //             }
-    
-    //             socket.current.on("authenticated", handleConnection)
-            
-    //         }
-
-    //         // Handle auth error
-    //         if (socket.current) {
-    //             socket.current.on("connect_error", (error) => {
-    //                 console.log(error)
-    //                 setDisabledRoom(true)
-    //             })
-    //         }
-            
-    //     } catch (error) {
-    //         console.log(error)
-    //     }
-    // }
-
-    // async function generateKeyPair() {
-    //     const { privateKey: privateKeyArmored, publicKey: publicKeyArmored } = await openpgp.generateKey({
-    //         type: "rsa",
-    //         rsaBits: 4096,
-    //         userIDs: [{ name: user.username}]
-    //     })
-
-    //     console.log({privateKeyArmored, publicKeyArmored})
-
-    //     const text = "Hello, World! 213"
-
-    //     const publicKey = await openpgp.readKey({armoredKey: publicKeyArmored})
-    //     const privateKey = await openpgp.readPrivateKey({armoredKey: privateKeyArmored})
-    //     const encryptedMessage = await openpgp.encrypt({
-    //         message: await openpgp.createMessage({text}),
-    //         encryptionKeys: publicKey
-    //     })
-
-    //     console.log({encryptedMessage})
-
-    //     const decryptedMessage = await openpgp.decrypt({
-    //         decryptionKeys: privateKey,
-    //         message: await openpgp.readMessage({armoredMessage: encryptedMessage})
-    //     })
-
-    //     console.log({decryptedMessage})
-
-        // create txt file with public key in it
-        // const element = document.createElement("a")
-        // const file = new Blob([publicKeyArmored], {type: "text/plain"})
-        // const url = URL.createObjectURL(file)
-
-        // element.href = url
-        // element.download = `publicKeyArmored${user.username}.txt`
-        // element.click()
-
-        // URL.revokeObjectURL(url)
-
-    // }
-
-
     async function handleRoomJoin() {
         try {
             socket.current.emit("join-room", {room,username: user.username, password: roomPassword})
@@ -202,11 +123,20 @@ function Main() {
 
     async function handleSendMessage() {
         if (newMessage) {
+            if (!publicKeyArmored) {
+                console.log("public key is empty")
+                return
+            }
+
             setMessages(prevMessages => [...prevMessages, {
                 type: "message",
                 text: newMessage 
             }])
-            socket.current.emit("send-message", {username, room, message: newMessage})
+
+
+            const encryptedMessage = await encryptMessage(newMessage, publicKeyArmored)
+            
+            socket.current.emit("send-message", {username, room, message: encryptedMessage})
             setNewMessage("")
         }
     }
@@ -218,22 +148,21 @@ function Main() {
     async function handleGenerateKeyPair() {
         await generateKeyPair(user)
     }
-
+ 
     return (<>
         <Chatbox messages={messages}/>
-        {/* <div className="form-wrapper">
+        <div className="form-wrapper">
             <div className="form">
-                <label className="form-label" htmlFor="username">Username: </label>
-                <input type="text" className="form-input" id="username" value={username} onChange={(e) => setUsername(e.target.value)}/>
+                <label htmlFor="publicKey">Public key: </label>
+                <input type="file" name="publicKey" id="publicKey" onChange={e => handleFileRead(e, setPublicKeyAromored)}/>
             </div>
         </div>
         <div className="form-wrapper">
             <div className="form">
-                <label className="form-label" htmlFor="user-password">Password: </label>
-                <input type="text" className="form-input" id="user-password" value={userPassword} onChange={(e) => setUserPassword(e.target.value)}/>
-                <button onClick={handleUserJoin}>Join</button>
+                <label htmlFor="privateKey">Private key: </label>
+                <input type="file" name="privateKey" id="privateKey" onChange={e => handleFileRead(e, setPrivateKeyArmored)}/>
             </div>
-        </div> */}
+        </div>
         <div className="form-wrapper">
             <div className="form">
                 <label className="form-label" htmlFor="room">room: </label>
