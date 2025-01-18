@@ -1,5 +1,6 @@
 import "../styles/main.css"
 import  { useState, useEffect, useRef, use } from "react"
+import { useNavigate } from "react-router"
 import { io } from "socket.io-client"
 import { useDispatch, useSelector } from "react-redux"
 import { logout } from "../features/auth/authSlice"
@@ -14,7 +15,7 @@ import {
 function Main() {
     const [username, setUsername] = useState("")
     const [userPassword, setUserPassword] = useState("")
-    const [token, setToken] = useState(JSON.parse(localStorage.getItem("user")).token)
+    const [token, setToken] = useState(localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).token : "")
     const [room, setRoom] = useState("")
     const [roomPassword, setRoomPassword] = useState("")
     const [userFromDb, setUserFromDb] = useState(null)
@@ -25,10 +26,11 @@ function Main() {
     const [publicKeyArmored, setPublicKeyAromored] = useState("")
     const [privateKeyArmored, setPrivateKeyArmored] = useState("")
 
-    const { user } = useSelector(state => state.auth)
+    const { user, isSuccess } = useSelector(state => state.auth)
 
     let socket = useRef(null)
     const dispatch = useDispatch()
+    const navigate = useNavigate()
 
     useEffect(() => {
         if (socket.current) {
@@ -112,6 +114,12 @@ function Main() {
             }
         }
     }, [socket.current])
+
+    useEffect(() => {
+        if (user === null) {
+            navigate("/login")
+        }
+    }, [user])
 
     async function handleRoomJoin() {
         try {
