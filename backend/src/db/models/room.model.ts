@@ -8,6 +8,7 @@ import {
 import sequelize from "../sequelize";
 import RoomMember from "./room_member.model";
 import User from "./user.model";
+import AppError from "../../utils/appError";
 
 class Room extends Model {
     declare id: number
@@ -19,7 +20,7 @@ class Room extends Model {
     declare members: User[]
 
     // Association methods
-    declare addMember: BelongsToManyAddAssociationMixin<User, number>;
+    declare private addMember: BelongsToManyAddAssociationMixin<User, number>;
     declare getMembers: BelongsToManyGetAssociationsMixin<User>;
     declare removeMember: BelongsToManyRemoveAssociationMixin<User, number>
 
@@ -33,6 +34,16 @@ class Room extends Model {
         this.belongsToMany(User, { foreignKey: "roomId", otherKey: "memberId", through: RoomMember, as: "members" })
         this.hasMany(RoomMember, { foreignKey: "roomId" })
     }
+
+    public async addMemberWithCheck(memberId: number) {
+        const members = await this.getMembers()
+        if (members.length >= 2) {
+            throw new AppError("Room is full", 400)
+        }
+
+        await this.addMember(memberId)
+    }
+
 }
 
 Room.init({

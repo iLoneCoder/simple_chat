@@ -87,7 +87,7 @@ export async function addMemberToRoom(req: Request, res: Response, next: NextFun
             throw new AppError("Incorrect password", 400)
         }
 
-        await room.addMember(req.user.id)
+        await room.addMemberWithCheck(req.user.id)
 
         res.status(201).json({
             status: "success",
