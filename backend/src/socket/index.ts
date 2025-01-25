@@ -8,7 +8,7 @@ export default function socketHandler(socket: Socket, io: Server) {
     
     socket.on("send-message", (messageObj: {username: string, room: string, message: string}) => {
         if (messageObj.room) {
-            socket.to(messageObj.room).emit("receive-message", {username: messageObj.username, type: "message", text: messageObj.message})
+            socket.broadcast.to(messageObj.room).emit("receive-message", {username: messageObj.username, type: "message", text: messageObj.message})
         }
     })
 
