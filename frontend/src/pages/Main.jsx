@@ -1,6 +1,6 @@
 import "../styles/main.css"
 import  { useState, useEffect, useRef, use } from "react"
-import { useNavigate } from "react-router"
+import { useNavigate } from "react-router-dom"
 import { io } from "socket.io-client"
 import { useDispatch, useSelector } from "react-redux"
 import { logout } from "../features/auth/authSlice"

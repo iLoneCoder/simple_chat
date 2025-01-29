@@ -5,7 +5,7 @@ import { jwtDecode } from "jwt-decode"
 const USER = JSON.parse(localStorage.getItem("user"))
 
 const initialState = {
-    user: USER ? jwtDecode(USER.token) : null,
+    user: USER?.token ? jwtDecode(USER.token) : "",
     isError: false,
     isSuccess: false,
     isLoading: true,
