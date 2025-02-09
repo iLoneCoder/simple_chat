@@ -11,6 +11,7 @@ import {
     encryptMessage,
     decryptMessage
     } from "../utils/helpers"
+import axios from "axios"
 
 function Main() {
     const [username, setUsername] = useState("")
@@ -154,7 +155,22 @@ function Main() {
     }
 
     async function handleGenerateKeyPair() {
-        await generateKeyPair(user)
+        const { publicKeyArmored } = await generateKeyPair(user)
+    
+        try {
+            await axios.patch(`/api/v1/user/${user.username}`,  
+                {
+                    publicKey: publicKeyArmored
+                },
+                {
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    }
+                })
+        } catch (error) {
+            console.log(error)
+        }
     }
  
     return (<>

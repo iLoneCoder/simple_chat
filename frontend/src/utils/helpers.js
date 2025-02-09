@@ -16,7 +16,7 @@ function downloadFile(file, filename) {
 export async function generateKeyPair(user) {
     const { privateKey: privateKeyArmored, publicKey: publicKeyArmored } = await openpgp.generateKey({
         type: "rsa",
-        rsaBits: 4096,
+        rsaBits: 2048,
         userIDs: [{ name: user.username}]
     })
 
@@ -27,7 +27,10 @@ export async function generateKeyPair(user) {
 
     const content = await zip.generateAsync({type: "blob"})
     downloadFile(content, "keypair.zip")
-
+    console.log(publicKeyArmored)
+    return {
+        publicKeyArmored
+    }
 }
 
 
@@ -48,6 +51,7 @@ export async function handleFileRead(e, setFileContentState) {
 
 // encrypt message
 export async function encryptMessage(message, publicKeyArmored) {
+    
     const publicKey = await openpgp.readKey({armoredKey: publicKeyArmored})
     const encryptedMessage = await openpgp.encrypt({
         message: await openpgp.createMessage({text: message}),

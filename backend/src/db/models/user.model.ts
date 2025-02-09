@@ -10,6 +10,7 @@ class User extends Model {
     // declare RoomMembers: RoomMember[]
     // declare Rooms: Room[]
     declare rooms: Room[]
+    declare publicKey: string
 
     declare getRooms: BelongsToManyGetAssociationsMixin<Room>
     declare removeRoom: BelongsToManyRemoveAssociationMixin<Room, number>
@@ -41,6 +42,10 @@ User.init({
     password: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    publicKey: {
+        type: DataTypes.TEXT,
+        allowNull: true
     }
 },
 {

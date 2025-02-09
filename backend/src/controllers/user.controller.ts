@@ -139,3 +139,31 @@ export async function getUserDetails(req: Request, res: Response, next: NextFunc
         next(error)
     }
 }
+
+
+export async function updateUser(req: Request<{username: string}, {}, {publicKey: string}>, res: Response, next: NextFunction) {
+    try {
+        const { username } = req.params
+        const { publicKey } = req.body
+
+        if (!username) {
+            throw new AppError("username is required", 400)
+        }
+
+        if (!publicKey) {
+            throw new AppError("publicKey is required", 400)
+        }
+
+        const user = await User.findOne({where: {username}})
+
+        if (!user) {
+            throw new AppError("User not found", 404)
+        }
+
+        await user.update({publicKey})
+
+        res.status(204).json()
+    } catch (error) {
+        next(error)
+    }
+}
