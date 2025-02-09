@@ -15,7 +15,7 @@ class Room extends Model {
     declare name: string
     declare password: string
     declare isProtected: boolean
-    declare RoomMembers: RoomMember[]
+    // declare RoomMembers: RoomMember[]
     // declare Members: User[]
     declare members: User[]
 
@@ -25,14 +25,14 @@ class Room extends Model {
     declare removeMember: BelongsToManyRemoveAssociationMixin<User, number>
 
     static associations: { 
-        RoomMembers: Association<Room, RoomMember>; 
+        // RoomMembers: Association<Room, RoomMember>; 
         // Members: Association<Room, User>; 
         members: Association<Room, User>; 
     }
 
     static associate() {
         this.belongsToMany(User, { foreignKey: "roomId", otherKey: "memberId", through: RoomMember, as: "members" })
-        this.hasMany(RoomMember, { foreignKey: "roomId" })
+        // this.hasMany(RoomMember, { foreignKey: "roomId" })
     }
 
     public async addMemberWithCheck(memberId: number) {

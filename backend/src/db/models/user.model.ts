@@ -7,7 +7,7 @@ class User extends Model {
     declare id: number
     declare username: string
     declare password: string
-    declare RoomMembers: RoomMember[]
+    // declare RoomMembers: RoomMember[]
     // declare Rooms: Room[]
     declare rooms: Room[]
 
@@ -15,14 +15,14 @@ class User extends Model {
     declare removeRoom: BelongsToManyRemoveAssociationMixin<Room, number>
 
     static associations: { 
-        RoomMembers: Association<User, RoomMember>; 
+        // RoomMembers: Association<User, RoomMember>; 
         // Room: Association<User, Room>;
         rooms: Association<User, Room>
     }
 
     static associate() {
         this.belongsToMany(Room, { foreignKey: "memberId", otherKey: "roomId", through: RoomMember, as: "rooms"})
-        this.hasMany(RoomMember, { foreignKey: "memberId" })
+        // this.hasMany(RoomMember, { foreignKey: "memberId" })
     }
 }
 

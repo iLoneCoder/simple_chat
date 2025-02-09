@@ -179,7 +179,7 @@ export async function getRoomMembers(req: Request, res: Response, next: NextFunc
         if (!roomMembers) {
             throw new AppError("Room not found", 404)
         }
-        
+
         res.status(200).json({
             status: "success",
             data: roomMembers
